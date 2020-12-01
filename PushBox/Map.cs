@@ -10,13 +10,13 @@ namespace PushBox
             {
                 for (int j = 0; j < Width; j++)
                 {
-                    RenderGrid(_grids[i, j]);
+                    RenderGrid(this.grids[i, j]);
                 }
                 Console.Out.WriteLine();
             }
         }
 
-        private static void RenderGrid(GridType gridType)
+        static void RenderGrid(GridType gridType)
         {
             switch (gridType)
             {
@@ -36,19 +36,19 @@ namespace PushBox
                     throw new ArgumentOutOfRangeException(nameof(gridType), gridType, null);
             } 
         }
-        
-        private const int Width = 4;
-        private const int Height = 4;
 
-        private enum GridType
+        const int Width = 4;
+        const int Height = 4;
+
+        enum GridType
         {
             Wall,
             Box,
             Player,
             Empty,
         }
-        
-        private readonly GridType[,] _grids = new GridType[Height, Width]
+
+        readonly GridType[,] grids = new GridType[Height, Width]
         {
             {GridType.Wall, GridType.Wall, GridType.Wall, GridType.Wall},
             {GridType.Wall, GridType.Empty, GridType.Box, GridType.Wall},
