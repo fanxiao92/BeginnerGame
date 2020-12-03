@@ -21,7 +21,7 @@ namespace PushBox
             Position deltaPosition = this.deltaPositions[(int)moveType];
             Position playerCurrLocation = this.map.GetPlayerLocation();
             Position playerNextLocation = playerCurrLocation + deltaPosition;
-            this.map.MoveToTargetLocation(playerCurrLocation, playerNextLocation);
+            this.map.MoveToTargetLocation(playerCurrLocation, playerNextLocation, playerNextLocation + deltaPosition);
         }
 
         readonly Map map;

@@ -105,8 +105,9 @@ namespace PushBox
         /// </summary>
         /// <param name="currLocation"></param>
         /// <param name="nextLocation"></param>
+        /// <param name="nextDirectLocation"></param>
         /// <returns></returns>
-        public void MoveToTargetLocation(Position currLocation, Position nextLocation)
+        public void MoveToTargetLocation(Position currLocation, Position nextLocation, Position nextDirectLocation)
         {
             var grid = (MapObjectType)this.grids[nextLocation.ToSingle(this.width)];
             switch (grid)
@@ -120,12 +121,12 @@ namespace PushBox
                 case MapObjectType.Goal:
                     this.MoveToGoalLocation(currLocation, nextLocation);
                     break;
-                // case MapObjectType.Box:
-                //     this.MoveToBoxLocation(currLocation, nextLocation);
-                //     break;
-                // case MapObjectType.BoxOnGoal:
-                //     this.MoveToBoxOnGoalLocation(currLocation, nextLocation);
-                //     break;
+                case MapObjectType.Box:
+                    this.MoveToBoxLocation(currLocation, nextLocation, nextDirectLocation);
+                    break;
+                case MapObjectType.BoxOnGoal:
+                    this.MoveToBoxOnGoalLocation(currLocation, nextLocation, nextDirectLocation);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -199,13 +200,14 @@ namespace PushBox
             }
             this.grids[nextIdx] = (int)MapObjectType.PlayerOnGoal;
         }
-        
+
         /// <summary>
         /// 移动到墙位置
         /// </summary>
         /// <param name="currLocation"></param>
         /// <param name="nextLocation"></param>
-        void MoveToBoxLocation(Position currLocation, Position nextLocation)
+        /// <param name="nextDirectLocation"></param>
+        void MoveToBoxLocation(Position currLocation, Position nextLocation, Position nextDirectLocation)
         {
             int currIdx = currLocation.ToSingle(this.width);
             int currGrid = this.grids[currIdx];
@@ -213,7 +215,61 @@ namespace PushBox
 
             int nextIdx = nextLocation.ToSingle(this.width);
             int nextGrid = this.grids[nextIdx];
-            Debug.Assert(nextGrid == (int)MapObjectType.Goal);
+            Debug.Assert(nextGrid == (int)MapObjectType.Box);
+
+            int nextDirectIdx = nextDirectLocation.ToSingle(this.width);
+            int nextDirectGrid = this.grids[nextDirectIdx];
+            if (nextDirectGrid == (int)MapObjectType.Box ||
+                nextDirectGrid == (int)MapObjectType.BoxOnGoal ||
+                nextDirectGrid == (int)MapObjectType.Wall)
+            {
+                return;
+            }
+            
+            if (currGrid == (int)MapObjectType.PlayerOnGoal)
+            {
+                this.grids[currIdx] = (int)MapObjectType.Goal;
+            }
+            else
+            {
+                this.grids[currIdx] = (int)MapObjectType.Space;
+            }
+            this.grids[nextIdx] = (int)MapObjectType.Player;
+            
+            if (nextDirectGrid == (int)MapObjectType.Goal)
+            {
+                this.grids[nextDirectIdx] = (int)MapObjectType.BoxOnGoal;
+            }
+            else
+            {
+                this.grids[nextDirectIdx] = (int)MapObjectType.Box;
+            }
+        }
+        
+        /// <summary>
+        /// 移动到墙位置
+        /// </summary>
+        /// <param name="currLocation"></param>
+        /// <param name="nextLocation"></param>
+        /// <param name="nextDirectLocation"></param>
+        void MoveToBoxOnGoalLocation(Position currLocation, Position nextLocation, Position nextDirectLocation)
+        {
+            int currIdx = currLocation.ToSingle(this.width);
+            int currGrid = this.grids[currIdx];
+            Debug.Assert(currGrid == (int)MapObjectType.Player || currGrid == (int)MapObjectType.PlayerOnGoal);
+
+            int nextIdx = nextLocation.ToSingle(this.width);
+            int nextGrid = this.grids[nextIdx];
+            Debug.Assert(nextGrid == (int)MapObjectType.BoxOnGoal);
+            
+            int nextDirectIdx = nextDirectLocation.ToSingle(this.width);
+            int nextDirectGrid = this.grids[nextDirectIdx];
+            if (nextDirectGrid == (int)MapObjectType.Box ||
+                nextDirectGrid == (int)MapObjectType.BoxOnGoal ||
+                nextDirectGrid == (int)MapObjectType.Wall)
+            {
+                return;
+            }
             
             if (currGrid == (int)MapObjectType.PlayerOnGoal)
             {
@@ -224,34 +280,16 @@ namespace PushBox
                 this.grids[currIdx] = (int)MapObjectType.Space;
             }
             this.grids[nextIdx] = (int)MapObjectType.PlayerOnGoal;
-        }
-        
-        /// <summary>
-        /// 移动到墙位置
-        /// </summary>
-        /// <param name="currLocation"></param>
-        /// <param name="nextLocation"></param>
-        void MoveToBoxOnGoalLocation(Position currLocation, Position nextLocation)
-        {
-            int currIdx = currLocation.ToSingle(this.width);
-            int currGrid = this.grids[currIdx];
-            Debug.Assert(currGrid == (int)MapObjectType.Player || currGrid == (int)MapObjectType.PlayerOnGoal);
 
-            int nextIdx = nextLocation.ToSingle(this.width);
-            int nextGrid = this.grids[nextIdx];
-            Debug.Assert(nextGrid == (int)MapObjectType.Goal);
-            
-            if (currGrid == (int)MapObjectType.PlayerOnGoal)
+            if (nextDirectGrid == (int)MapObjectType.Goal)
             {
-                this.grids[currIdx] = (int)MapObjectType.Goal;
+                this.grids[nextDirectIdx] = (int)MapObjectType.BoxOnGoal;
             }
             else
             {
-                this.grids[currIdx] = (int)MapObjectType.Space;
+                this.grids[nextDirectIdx] = (int)MapObjectType.Box;
             }
-            this.grids[nextIdx] = (int)MapObjectType.PlayerOnGoal;
         }
-        
         
         int height;
         int width;
